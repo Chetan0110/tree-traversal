@@ -4,12 +4,14 @@ import * as $ from 'jquery';
 import '../css/binaryTree.css'
 
 export default function TreeDiagram(chart) {
-    chart.drawTreeDiagram = function () {
+    this.init = function (divId, data, updatedTraversal) {
+        this.divId = divId;
+        this.data = data;
+        this.updatedTraversal = updatedTraversal;
+    }
+    this.drawTreeDiagram = function () {
         var me = this;
         $('#' + me.divId).empty();
-        me.currType = 0;
-        // chart.initSVG();
-        // chart.svg.attr('height', this.VisHeight); //.attr('width',this);
 
         var margin = { top: 50, right: 300, bottom: 50, left: 300 },
             width = window.innerWidth - margin.left - margin.right,
@@ -24,7 +26,6 @@ export default function TreeDiagram(chart) {
             .attr("width", width + margin.right + margin.left)
             .attr("height", height + margin.top + margin.bottom)
 
-
         var g = svg.append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
@@ -33,18 +34,12 @@ export default function TreeDiagram(chart) {
 
 
         function buildHeap(inData) {
-
             var newsource = { name: inData[0], children: getChildren(0, inData) }
-            //   console.log('dl', newsource)
-
             root = d3.hierarchy(newsource, function (d) { return d.children; });
-
             root.x0 = 0;
             root.y0 = width / 2;
-
             update(root)
         }
-
 
         // just leaving this global so i can mess with it in the console
         var nodes;
@@ -67,7 +62,7 @@ export default function TreeDiagram(chart) {
                 .attr("transform", function (d) {
                     return "translate(" + source.x0 + "," + source.y0 + ")";
                 })
-                .on('click', click);
+            // .on('click', click);
 
             // Add Circle for the nodes
             nodeEnter.append('circle')
@@ -80,17 +75,14 @@ export default function TreeDiagram(chart) {
 
             // Add labels for the nodes
             nodeEnter.append('text')
-                // .attr("dy", ".35em")
-                // .attr("x", function (d) {
-                //     return d.children || d._children ? -13 : 13;
-                // })
                 .attr("text-anchor", function (d) {
-                    // return d.children || d._children ? "end" : "start";
                     return 'middle';
                 })
                 .text(function (d) { return d.data.name; });
 
 
+            // Add index for the node based on
+            // selected type
             nodeEnter.append('text')
                 .transition()
                 .duration(5000)
@@ -102,12 +94,14 @@ export default function TreeDiagram(chart) {
                     return d.children || d._children ? "end" : "start";
                 })
                 .text(function (d) {
-                    // setTimeout(function (d) {
-                    let index = me.data.indexOf(d.data.name);
+                    let index = me.updatedTraversal.indexOf(d.data.name);
                     return ++index;
-                    // }, 3000)
-                });
+                })
+                .style('font-size', '20px')
+                .style('font-weight', 'bold');
 
+            // To display whole traversal pattern
+            // with commas to separate the nodes 
             var groups = svg.selectAll("groups")
                 .data(me.updatedTraversal)
                 .enter()
@@ -118,6 +112,8 @@ export default function TreeDiagram(chart) {
                 .data(me.updatedTraversal)
                 .enter()
                 .append("text")
+                .transition()
+                .duration(5000)
                 .attr("x", (d, i) => 30 * i + 600)
                 .attr("y", 0)
                 .text(d => d + ',');
@@ -216,7 +212,6 @@ export default function TreeDiagram(chart) {
 
             var nextin = i * 2 + 1;
             if (arr[nextin * 2 + 1]) {
-                //  console.log('more children')
                 childs[0].children = getChildren(nextin, arr)
                 childs[0]._children = null;
 
@@ -228,98 +223,17 @@ export default function TreeDiagram(chart) {
             return childs;
         }
 
-
-        // not called but kind of what I might use to annimate the swap thing while
-        // balancing binary heaps
-        function expandChildren(index, chi) {
-            setTimeout(function () {
-                if (nodes[index].children === null) {
-                    nodes[0].children = [nodes[0]._children[chi]]
-                }
-                else {
-                    console.log(typeof nodes[0].children)
-                    nodes[index].children.push(nodes[index]._children[1])
-                }
-                update(nodes[index])
-                if (chi < 1) {
-                    expandChildren(0, 1)
-                }
-            }, 3000);
-
-        }
-
         // Creates a curved (diagonal) path from parent to the child nodes
         // switched around all the x's and y's from orig so it's verticle
         function diagonal(s, d) {
-            //console.log('in diag and s = ', s);
-            //console.log('d = ', d)
-
             let path = `M ${s.x} ${s.y}
           C ${(s.x + d.x) / 2} ${s.y},
             ${(s.x + d.x) / 2} ${d.y},
             ${d.x} ${d.y}`
 
             return path;
-
         }
-
-
-        // Toggle children on click.
-        function click(d) {
-            // use the following to superficially change the text of the node.
-            //  this.getElementsByTagName('text')[0].textContent = "clicked all over"
-
-            if (d.children) {
-                d._children = d.children;
-                d.children = null;
-            } else {
-                d.children = d._children;
-                d._children = null;
-            }
-
-            update(d);
-        }
-
-        // will make all the children null and store the real vals in _children
-        function collapse(d) {
-            if (d.children) {
-                d._children = d.children
-                d.children = null;
-                d._children.forEach(collapse)
-
-            }
-        }
-
 
         buildHeap(this.data);
-
-        // let types = ['Breadth First', 'Pre Order', 'In Order', 'Post Order'];
-        // $('#' + this.divId).prepend('<form id="binaryTreeControls_' + this.divId + '" style="padding-left: 5px;"></form>');
-        // for (let i = 0; i < types.length; i++) {
-        //     $('#binaryTreeControls_' + this.divId).append(
-        //         '<label style="margin: 5px;"><input type="radio" name="dataset" id="dataset' +
-        //         this.divId +
-        //         i +
-        //         '" value="' +
-        //         i +
-        //         '">  ' +
-        //         types[i] +
-        //         ' </label>'
-        //     );
-        // }
-        // // Select first pie by default
-        // d3.select('input[id="dataset' + this.divId + me.currType + '"]').property('checked', true);
-
-        // // On change of input change the pie
-        // d3.selectAll('#binaryTreeControls_' + this.divId + ' input').on('change', selectDataset);
-
-        // function selectDataset() {
-        //     var value = this.value;
-        //     // change(pie_data[value]);
-        //     me.currType = value;
-        //     me.drawVisualizationBinaryTree();
-        // }
-
-
     }
 }

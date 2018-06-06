@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 
 import Header from './Header';
-import { Chart } from '../charts';
+import { TreeDiagram } from '../charts';
 import { getAppropriateValues } from '../utils';
 
 class App extends Component {
@@ -16,31 +16,31 @@ class App extends Component {
   }
 
   onTraversalTypeChange(event) {
-    const updatedTraversal = getAppropriateValues(this.visualChart.nodes, event.target.value);
+    const updatedTraversal = getAppropriateValues(this.treeDiagram.nodes, event.target.value);
     this.setState({
       selectedType: event.target.value,
       updatedTraversal
     });
-    this.init("binaryTree", this.state.data, updatedTraversal)
+    this.init("tree", this.state.data, updatedTraversal)
   }
 
   render() {
     return (
       <div style={{ minHeight: 'inherit' }} >
         <Header onTypeChange={this.onTraversalTypeChange} />
-        <div id={"binaryTree"} style={{ minHeight: 'inherit' }} />
+        <div id={"tree"} style={{ minHeight: 'inherit' }} />
       </div>
     )
   }
 
   componentDidMount() {
-    this.init("binaryTree", this.state.data, this.state.data);
+    this.init("tree", this.state.data, this.state.data);
   }
 
   init(divId, data, updatedTraversal) {
-    this.visualChart = new Chart();
-    this.visualChart.init(divId, data, updatedTraversal);
-    this.visualChart.drawChart();
+    this.treeDiagram = new TreeDiagram();
+    this.treeDiagram.init(divId, data, updatedTraversal);
+    this.treeDiagram.drawTreeDiagram();
   }
 
 }
