@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 
 import Header from './Header';
-import Chart from '../charts';
+import { Chart } from '../charts';
 import { getAppropriateValues } from '../utils';
 
 class App extends Component {
