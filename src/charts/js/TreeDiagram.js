@@ -2,12 +2,14 @@ import * as d3 from 'd3';
 import * as $ from 'jquery';
 
 import '../css/binaryTree.css'
-
+const VISIT = 'visit';
+const SELECT = 'select';
 export default function TreeDiagram(chart) {
-    this.init = function (divId, data, updatedTraversal) {
+    this.init = function (divId, data, updatedTraversal, selectedType) {
         this.divId = divId;
         this.data = data;
         this.updatedTraversal = updatedTraversal;
+        this.selectedType = selectedType;
     }
     this.drawTreeDiagram = function () {
         var me = this;
@@ -21,30 +23,124 @@ export default function TreeDiagram(chart) {
             duration = 750,
             root;
 
-        var svg = d3.select("#" + me.divId)
+        this.svg = d3.select("#" + me.divId)
             .append("svg")
             .attr("width", width + margin.right + margin.left)
             .attr("height", height + margin.top + margin.bottom)
 
-        var g = svg.append("g")
+        var g = this.svg.append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
         var tree = d3.tree()
             .size([width, height]);
 
 
-        function buildHeap(inData) {
+        function buildHeap(inData, svg, selectedType) {
             var newsource = { name: inData[0], children: getChildren(0, inData) }
             root = d3.hierarchy(newsource, function (d) { return d.children; });
             root.x0 = 0;
             root.y0 = width / 2;
-            update(root)
+            var treeData = update(root, svg);
+            switch (selectedType) {
+                case 'preorder':
+                    animatePreorder(treeData, svg);
+                    break;
+                case 'inorder':
+                    animateInorder(treeData, svg);
+                    break;
+                case 'postorder':
+                    animatePostorder(treeData, svg);
+                    break;
+                default:
+            }
         }
 
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        async function drawCircle(root, svg, type) {
+
+            console.log(root.data.name, type, root.x, root.y);
+            // Add Circle for the nodes
+            svg.append('circle')
+                .data(me.data)
+                .attr('class', 'node')
+                // .attr('x', root.x)
+                // .attr('y', root.y)
+                .attr("transform", function (d) {
+                    return "translate(" + root.x + "," + root.y + ")";
+                })
+                .attr('r', 10)
+                .style("fill", (function (d) {
+                    return type === 'visit' ? "green" : "red";
+                }));
+
+
+            // To display whole traversal pattern
+            // with commas to separate the nodes 
+            var groups = svg.selectAll("groups")
+                .data(me.updatedTraversal)
+                .enter()
+                .append("g")
+            // .attr("transform", (d, i) => "translate(" + (width / 2) + "," + (height / 2) + ")");
+
+            groups.selectAll("texts")
+                .append("text")
+                // .transition()
+                // .duration(5000)
+                .attr("x", (d, i) => 30 * i + 600)
+                .attr("y", 0)
+                .text(d => d + ",");
+
+
+            await sleep(1000);
+
+        }
+
+        async function animateInorder(root, svg) {
+            await sleep(1000);
+            await drawCircle(root, svg, VISIT);
+            if (root.children) {
+                animateInorder(root.children[0], svg);
+                await drawCircle(root, svg, SELECT);
+                animateInorder(root.children[1], svg);
+                await sleep(1000);
+            } else {
+                await drawCircle(root, svg, SELECT);
+            }
+        }
+
+        async function animatePreorder(root, svg) {
+            await sleep(1000);
+            await drawCircle(root, svg, VISIT);
+            if (root.children) {
+                await drawCircle(root, svg, SELECT);
+                animatePreorder(root.children[0], svg);
+                await sleep(1000);
+                animatePreorder(root.children[1], svg);
+                await sleep(1000);
+            } else {
+                await drawCircle(root, svg, SELECT);
+            }
+        }
+
+        async function animatePostorder(root, svg) {
+            await sleep(1000);
+            await drawCircle(root, svg, VISIT);
+            if (root.children) {
+                animatePostorder(root.children[0], svg);
+                await sleep(1000);
+                animatePostorder(root.children[1], svg);
+                await sleep(1000);
+                await drawCircle(root, svg, SELECT);
+            } else {
+                await drawCircle(root, svg, SELECT);
+            }
+        }
         // just leaving this global so i can mess with it in the console
         var nodes;
-        me.nodes = nodes;
-        function update(source) {
+        function update(source, svg) {
             //  root = d3.hierarchy(newsource, function(d) { return d.children; });
 
             var treeData = tree(root)
@@ -84,8 +180,8 @@ export default function TreeDiagram(chart) {
             // Add index for the node based on
             // selected type
             nodeEnter.append('text')
-                .transition()
-                .duration(5000)
+                // .transition()
+                // .duration(5000)
                 .attr("dy", ".35em")
                 .attr("x", function (d) {
                     return d.children || d._children ? -13 : 13;
@@ -94,29 +190,14 @@ export default function TreeDiagram(chart) {
                     return d.children || d._children ? "end" : "start";
                 })
                 .text(function (d) {
+                    // return d.x + " " + d.y;
                     let index = me.updatedTraversal.indexOf(d.data.name);
                     return ++index;
                 })
                 .style('font-size', '20px')
                 .style('font-weight', 'bold');
 
-            // To display whole traversal pattern
-            // with commas to separate the nodes 
-            var groups = svg.selectAll("groups")
-                .data(me.updatedTraversal)
-                .enter()
-                .append("g")
-                .attr("transform", (d, i) => "translate(" + (width / 2) + "," + (height / 2) + ")");
 
-            groups.selectAll("texts")
-                .data(me.updatedTraversal)
-                .enter()
-                .append("text")
-                .transition()
-                .duration(5000)
-                .attr("x", (d, i) => 30 * i + 600)
-                .attr("y", 0)
-                .text(d => d + ',');
 
             // UPDATE
             var nodeUpdate = nodeEnter.merge(node);
@@ -193,7 +274,7 @@ export default function TreeDiagram(chart) {
                 d.y0 = d.y;
             });
 
-            me.nodes = nodes;
+            return treeData;
         }
 
         // Takes an index and an array and finds all the children.
@@ -234,6 +315,6 @@ export default function TreeDiagram(chart) {
             return path;
         }
 
-        buildHeap(this.data);
+        buildHeap(this.data, this.svg, this.selectedType);
     }
 }

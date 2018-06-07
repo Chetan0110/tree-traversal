@@ -21,7 +21,7 @@ class App extends Component {
       selectedType: event.target.value,
       updatedTraversal
     });
-    this.init("tree", this.state.data, updatedTraversal)
+    this.init("tree", this.state.data, updatedTraversal, event.target.value)
   }
 
   render() {
@@ -37,9 +37,9 @@ class App extends Component {
     this.init("tree", this.state.data, this.state.data);
   }
 
-  init(divId, data, updatedTraversal) {
+  init(divId, data, updatedTraversal, selectedType) {
     this.treeDiagram = new TreeDiagram();
-    this.treeDiagram.init(divId, data, updatedTraversal);
+    this.treeDiagram.init(divId, data, updatedTraversal, selectedType);
     this.treeDiagram.drawTreeDiagram();
   }
 
