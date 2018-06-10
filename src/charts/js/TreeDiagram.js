@@ -307,7 +307,8 @@ export default function TreeDiagram(chart) {
                 }));
 
             xLoc += 30;
-            // Add selected node's label 
+            // Add V or S based on node being visited or selected
+            // over nodes label
             svg.append('text')
                 .attr('x', xLoc)
                 .attr('y', 70)
@@ -321,6 +322,7 @@ export default function TreeDiagram(chart) {
                     return type === 'visit' ? 'green' : 'red'
                 });
 
+            // Add selected node's label 
             svg.append('text')
                 .attr('x', xLoc)
                 .attr('y', 100)

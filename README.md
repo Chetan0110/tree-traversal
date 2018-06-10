@@ -1,5 +1,8 @@
 # Tree Traversal
-A small app which provides correct traversal pattern based on the selected type.
+A small app which provides correct traversal pattern using animation based on the selected traversal type.
+Currently, supported traversal types are Breadth-First, Pre-order, In-order and Post-order.
+Green or red color will be filled if node is visited or selected respectively.
+**Note: The tree is static, dynamic tree is not supported as of now.** 
 
 ## Getting Started
 
