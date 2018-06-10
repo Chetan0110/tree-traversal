@@ -221,35 +221,49 @@ export default function TreeDiagram(chart) {
             return path;
         }
 
-        //Breadth First Animation implementation
+        //Bridth First amimation implementation
         async function animateBridthFirst(root, svg) {
-            await sleep(1000);
-            drawCircle(root, svg, VISIT);
-            if (root.children) {
-                await sleep(1000);
-                await drawCircle(root, svg, SELECT);
-                animateBridthFirst(root.children[0], svg);
-                await sleep(1000);
-                if (root.children[1])
-                    await animateBridthFirst(root.children[1], svg);
-            }
-            else {
-                await drawCircle(root, svg, SELECT);
-                await sleep(1000);
+            await sleep(duration);
+            let visited = {};
+            let queue = [];
+            visited[root.data.name] = true;
+            await drawCircle(root, svg, VISIT);
+            queue.push(root);
+            while (queue.length > 0) {
+                let parent = queue[0];
+                //show parent as selected
+                await drawCircle(parent, svg, SELECT);
+                await sleep(duration);
+                //dequeue an element
+                queue = [...queue.slice(1, queue.length)];
+                // If children present
+                if (parent.children) {
+                    for (let i = 0; i < parent.children.length; i++) {
+                        let child = parent.children[i];
+                        if (!visited[child.data.name]) {
+                            //show as visited
+                            await sleep(duration);
+                            await drawCircle(child, svg, VISIT);
+                            await sleep(duration);
+                            visited[child.data.name] = true;
+                            queue.push(child);
+                        }
+                    }
+                }
             }
         }
 
         //Pre order Animation implementation
         async function animatePreorder(root, svg) {
-            await sleep(1000);
+            await sleep(duration);
             await drawCircle(root, svg, VISIT);
             if (root.children) {
                 await drawCircle(root, svg, SELECT);
                 await animatePreorder(root.children[0], svg);
-                await sleep(1000);
+                await sleep(duration);
                 if (root.children[1])
                     await animatePreorder(root.children[1], svg);
-                await sleep(1000);
+                await sleep(duration);
             } else {
                 await drawCircle(root, svg, SELECT);
             }
@@ -257,14 +271,14 @@ export default function TreeDiagram(chart) {
 
         //In order Animation implementation
         async function animateInorder(root, svg) {
-            await sleep(1000);
+            await sleep(duration);
             await drawCircle(root, svg, VISIT);
             if (root.children) {
                 await animateInorder(root.children[0], svg);
                 await drawCircle(root, svg, SELECT);
                 if (root.children[1])
                     await animateInorder(root.children[1], svg);
-                await sleep(1000);
+                await sleep(duration);
             } else {
                 await drawCircle(root, svg, SELECT);
             }
@@ -272,14 +286,14 @@ export default function TreeDiagram(chart) {
 
         //Post order Animation implementation
         async function animatePostorder(root, svg) {
-            await sleep(1000);
+            await sleep(duration);
             await drawCircle(root, svg, VISIT);
             if (root.children) {
                 await animatePostorder(root.children[0], svg);
-                await sleep(1000);
+                await sleep(duration);
                 if (root.children[1])
                     await animatePostorder(root.children[1], svg);
-                await sleep(1000);
+                await sleep(duration);
                 await drawCircle(root, svg, SELECT);
             } else {
                 await drawCircle(root, svg, SELECT);
@@ -334,7 +348,7 @@ export default function TreeDiagram(chart) {
                     return type === 'visit' ? 'green' : 'red'
                 });
 
-            await sleep(1000);
+            await sleep(duration);
         }
 
         // Func which pause the execution by resolving 
