@@ -21,7 +21,7 @@ export default function TreeDiagram(chart) {
         // various types
         $('#' + me.divId).empty();
 
-        var margin = { top: 50, right: 300, bottom: 50, left: 300 },
+        var margin = { top: 100, right: 300, bottom: 100, left: 300 },
             width = window.innerWidth - margin.left - margin.right,
             height = window.innerHeight - margin.top - margin.bottom;
 
@@ -230,7 +230,8 @@ export default function TreeDiagram(chart) {
                 await drawCircle(root, svg, SELECT);
                 animateBridthFirst(root.children[0], svg);
                 await sleep(1000);
-                await animateBridthFirst(root.children[1], svg);
+                if (root.children[1])
+                    await animateBridthFirst(root.children[1], svg);
             }
             else {
                 await drawCircle(root, svg, SELECT);
@@ -244,10 +245,10 @@ export default function TreeDiagram(chart) {
             await drawCircle(root, svg, VISIT);
             if (root.children) {
                 await drawCircle(root, svg, SELECT);
-                await sleep(1000);
                 await animatePreorder(root.children[0], svg);
                 await sleep(1000);
-                await animatePreorder(root.children[1], svg);
+                if (root.children[1])
+                    await animatePreorder(root.children[1], svg);
                 await sleep(1000);
             } else {
                 await drawCircle(root, svg, SELECT);
@@ -261,7 +262,8 @@ export default function TreeDiagram(chart) {
             if (root.children) {
                 await animateInorder(root.children[0], svg);
                 await drawCircle(root, svg, SELECT);
-                await animateInorder(root.children[1], svg);
+                if (root.children[1])
+                    await animateInorder(root.children[1], svg);
                 await sleep(1000);
             } else {
                 await drawCircle(root, svg, SELECT);
@@ -275,7 +277,8 @@ export default function TreeDiagram(chart) {
             if (root.children) {
                 await animatePostorder(root.children[0], svg);
                 await sleep(1000);
-                await animatePostorder(root.children[1], svg);
+                if (root.children[1])
+                    await animatePostorder(root.children[1], svg);
                 await sleep(1000);
                 await drawCircle(root, svg, SELECT);
             } else {
@@ -293,7 +296,7 @@ export default function TreeDiagram(chart) {
                 .data(me.data)
                 .attr('class', 'node')
                 .attr("transform", function (d) {
-                    return "translate(" + (root.x + 300) + "," + (root.y + 50) + ")";
+                    return "translate(" + (root.x + 300) + "," + (root.y + 100) + ")";
                 })
                 .attr('r', 10)
                 .attr('stroke', function (d) {

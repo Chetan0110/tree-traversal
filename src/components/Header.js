@@ -7,8 +7,12 @@ import PropTypes from 'prop-types';
  */
 class Header extends Component {
     render() {
+        const style = {
+            paddingLeft: "33%",
+            paddingTop: "20px"
+        }
         return (
-            <div>
+            <div style={style}>
                 <form>
                     <input type='radio' name="treeType" value="breadthfirst" onChange={this.props.onTypeChange} />
                     <label>Breadth First</label>
