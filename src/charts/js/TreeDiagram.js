@@ -7,10 +7,11 @@ const SELECT = 'select';
 export default function TreeDiagram(chart) {
 
     // Initialize the variables
-    this.init = function (divId, data, selectedType) {
+    this.init = function (divId, data, selectedType, animSpeed) {
         this.divId = divId;
         this.data = data;
         this.selectedType = selectedType;
+        this.animSpeed = animSpeed;
     }
 
     this.drawTreeDiagram = function () {
@@ -66,11 +67,11 @@ export default function TreeDiagram(chart) {
         var tree = d3.tree()
             .size([width, height]);
 
-        buildTree(this.data, this.svg, this.selectedType);
+        buildTree(this.data, this.svg, this.selectedType, this.animSpeed);
 
         // method decides which kind of animation to show based on selected
         // traversal type
-        function buildTree(inData, svg, selectedType) {
+        function buildTree(inData, svg, selectedType, animSpeed) {
             var newsource = { name: inData[0], children: getChildren(0, inData) }
             root = d3.hierarchy(newsource, function (d) { return d.children; });
             root.x0 = 0;
@@ -80,16 +81,16 @@ export default function TreeDiagram(chart) {
             if (selectedType.length !== 0) {
                 switch (selectedType) {
                     case 'preorder':
-                        animatePreorder(treeData, svg);
+                        animatePreorder(treeData, svg, animSpeed);
                         break;
                     case 'inorder':
-                        animateInorder(treeData, svg);
+                        animateInorder(treeData, svg, animSpeed);
                         break;
                     case 'postorder':
-                        animatePostorder(treeData, svg);
+                        animatePostorder(treeData, svg, animSpeed);
                         break;
                     default:
-                        animateBridthFirst(treeData, svg);
+                        animateBridthFirst(treeData, svg, animSpeed);
                 }
             }
         }
@@ -222,18 +223,18 @@ export default function TreeDiagram(chart) {
         }
 
         //Bridth First amimation implementation
-        async function animateBridthFirst(root, svg) {
-            await sleep(duration);
+        async function animateBridthFirst(root, svg, animSpeed) {
+            await sleep(animSpeed);
             let visited = {};
             let queue = [];
             visited[root.data.name] = true;
-            await drawCircle(root, svg, VISIT);
+            await drawCircle(root, svg, VISIT, animSpeed);
             queue.push(root);
             while (queue.length > 0) {
                 let parent = queue[0];
                 //show parent as selected
-                await drawCircle(parent, svg, SELECT);
-                await sleep(duration);
+                await drawCircle(parent, svg, SELECT, animSpeed);
+                await sleep(animSpeed);
                 //dequeue an element
                 queue = [...queue.slice(1, queue.length)];
                 // If children present
@@ -242,9 +243,8 @@ export default function TreeDiagram(chart) {
                         let child = parent.children[i];
                         if (!visited[child.data.name]) {
                             //show as visited
-                            await sleep(duration);
-                            await drawCircle(child, svg, VISIT);
-                            await sleep(duration);
+                            await drawCircle(child, svg, VISIT, animSpeed);
+                            await sleep(animSpeed);
                             visited[child.data.name] = true;
                             queue.push(child);
                         }
@@ -254,49 +254,49 @@ export default function TreeDiagram(chart) {
         }
 
         //Pre order Animation implementation
-        async function animatePreorder(root, svg) {
-            await sleep(duration);
-            await drawCircle(root, svg, VISIT);
+        async function animatePreorder(root, svg, animSpeed) {
+            await sleep(animSpeed);
+            await drawCircle(root, svg, VISIT, animSpeed);
             if (root.children) {
-                await drawCircle(root, svg, SELECT);
-                await animatePreorder(root.children[0], svg);
-                await sleep(duration);
+                await drawCircle(root, svg, SELECT, animSpeed);
+                await animatePreorder(root.children[0], svg, animSpeed);
+                await sleep(animSpeed);
                 if (root.children[1])
-                    await animatePreorder(root.children[1], svg);
-                await sleep(duration);
+                    await animatePreorder(root.children[1], svg, animSpeed);
+                await sleep(animSpeed);
             } else {
-                await drawCircle(root, svg, SELECT);
+                await drawCircle(root, svg, SELECT, animSpeed);
             }
         }
 
         //In order Animation implementation
-        async function animateInorder(root, svg) {
-            await sleep(duration);
-            await drawCircle(root, svg, VISIT);
+        async function animateInorder(root, svg, animSpeed) {
+            await sleep(animSpeed);
+            await drawCircle(root, svg, VISIT, animSpeed);
             if (root.children) {
-                await animateInorder(root.children[0], svg);
-                await drawCircle(root, svg, SELECT);
+                await animateInorder(root.children[0], svg, animSpeed);
+                await drawCircle(root, svg, SELECT, animSpeed);
                 if (root.children[1])
-                    await animateInorder(root.children[1], svg);
-                await sleep(duration);
+                    await animateInorder(root.children[1], svg, animSpeed);
+                await sleep(animSpeed);
             } else {
-                await drawCircle(root, svg, SELECT);
+                await drawCircle(root, svg, SELECT, animSpeed);
             }
         }
 
         //Post order Animation implementation
-        async function animatePostorder(root, svg) {
-            await sleep(duration);
-            await drawCircle(root, svg, VISIT);
+        async function animatePostorder(root, svg, animSpeed) {
+            await sleep(animSpeed);
+            await drawCircle(root, svg, VISIT, animSpeed);
             if (root.children) {
-                await animatePostorder(root.children[0], svg);
-                await sleep(duration);
+                await animatePostorder(root.children[0], svg, animSpeed);
+                await sleep(animSpeed);
                 if (root.children[1])
-                    await animatePostorder(root.children[1], svg);
-                await sleep(duration);
-                await drawCircle(root, svg, SELECT);
+                    await animatePostorder(root.children[1], svg, animSpeed);
+                await sleep(animSpeed);
+                await drawCircle(root, svg, SELECT, animSpeed);
             } else {
-                await drawCircle(root, svg, SELECT);
+                await drawCircle(root, svg, SELECT, animSpeed);
             }
         }
 
@@ -304,7 +304,7 @@ export default function TreeDiagram(chart) {
         // Based on passed type
         // Type could be "visit" or "select"
         var xLoc = 800;
-        async function drawCircle(root, svg, type) {
+        async function drawCircle(root, svg, type, animSpeed) {
             // Add Circle for the nodes
             svg.append('circle')
                 .data(me.data)
@@ -348,7 +348,7 @@ export default function TreeDiagram(chart) {
                     return type === 'visit' ? 'green' : 'red'
                 });
 
-            await sleep(duration);
+            await sleep(animSpeed);
         }
 
         // Func which pause the execution by resolving 

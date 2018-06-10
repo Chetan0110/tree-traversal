@@ -6,10 +6,25 @@ import PropTypes from 'prop-types';
  * the different type of traversal to choose from
  */
 class Header extends Component {
+
+    constructor() {
+        super();
+        this.state = {
+            animSpeed: 750
+        }
+
+    }
+
+    onAnimSpeedChange = (event) => {
+        this.setState({ animSpeed: event.target.value });
+    }
+
     render() {
         const style = {
-            paddingLeft: "33%",
-            paddingTop: "20px"
+            paddingLeft: "20%",
+            paddingTop: "20px",
+            float: 'left',
+            display: 'inline-block'
         }
         return (
             <div style={style}>
@@ -25,6 +40,14 @@ class Header extends Component {
                     {' '}
                     <input type='radio' name="treeType" value="postorder" onChange={this.props.onTypeChange} />
                     <label>Postorder</label>
+                    {
+                        this.props.selTraversalType.length !== 0 ? <span>
+                            <label style={{ paddingLeft: '100px' }}>Traverse Speed: </label>
+                            <input type='number' name='animSpeed' defaultValue={this.state.animSpeed} onChange={this.onAnimSpeedChange} />
+                            <label> (in ms) </label>
+                            <button onClick={e => this.props.onApplyClick(e, this.state.animSpeed)}>APPLY</button>
+                        </span> : null
+                    }
                 </form>
             </div>
         );
