@@ -4,6 +4,10 @@ Currently, supported traversal types are Breadth-First, Pre-order, In-order and 
 Green or red color will be filled if node is visited or selected respectively.
 **Note: The tree is static, dynamic tree is not supported as of now.** 
 
+## References
+
+* A reference have been taken from [this](https://bl.ocks.org/mpmckenna8/1bdbff541a7f47909c5b1471748b5638) example to build the static vertical tree diagram.
+ 
 ## Getting Started
 
 * Download and install node's latest version based on your system from [here](https://nodejs.org/en/download/)
@@ -36,3 +40,4 @@ Green or red color will be filled if node is visited or selected respectively.
 * You can keep **build directory** as it is or you can move it anywhere else
 * Install serve to run the build by running command `npm install -g serve`
 * Go to build directory and run `serve -s .` or go to parent directory of **build** and run `serve -s build`
+
